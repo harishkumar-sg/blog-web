@@ -9,6 +9,8 @@ const exp = require('constants');
 
 const app = express();
 
+
+
 const dbURI='mongodb+srv://netninja:12345@nodetuts.4f32i.mongodb.net/node-tuts?retryWrites=true&w=majority'
 mongoose.connect(dbURI,{useNewUrlParser:true,useUnifiedTopology:true})
 .then((result)=>app.listen(312))
@@ -138,4 +140,3 @@ app.delete('/blogs/:id',(req,res)=>{
 app.use((req, res) => {
   res.status(404).render('404', { title: '404' });
 });
-
