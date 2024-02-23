@@ -33,9 +33,14 @@ jobs:
           script: |
             const output = process.env['OUTPUT'];
             
-            github.issues.createComment({
-              owner: github.context.repo.owner,
-              repo: github.context.repo.repo,
-              issue_number: github.context.issue.number,
-              body: `\`\`\`${output}\`\`\``
-            });
+            if (github && github.issues && github.issues.createComment) {
+              github.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `\`\`\`${output}\`\`\``
+              });
+            } else {
+              console.error('Error accessing github context or createComment function.');
+              console.log('github:', github);
+            }
