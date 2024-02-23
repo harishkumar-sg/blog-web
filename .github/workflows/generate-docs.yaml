@@ -27,20 +27,11 @@ jobs:
           echo "::set-output name=output::$output"
 
       - name: Comment on Pull Request
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const output = process.env['OUTPUT'];
-            
-            if (github && github.issues && github.issues.createComment) {
-              github.issues.createComment({
-                owner: github.context.repo.owner,
-                repo: github.context.repo.repo,
-                issue_number: github.context.issue.number,
-                body: `\`\`\`${output}\`\`\``
-              });
-            } else {
-              console.error('Error accessing github context or createComment function.');
-              console.log('github:', github);
-            }
+        run: |
+          output=$GITHUB_EVENT_PATH
+          COMMENT="Generated documentation:\n\`\`\`${output}\`\`\`"
+
+          npx octokit rest -o $GITHUB_REPOSITORY -r $GITHUB_REPOSITORY issues/create-comment@v1 \
+            --issue_number ${{ github.event.pull_request.number }} \
+            --body "$COMMENT" \
+            --token ${{ secrets.GITHUB_TOKEN }}
