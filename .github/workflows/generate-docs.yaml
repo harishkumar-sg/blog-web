@@ -24,14 +24,10 @@ jobs:
         id: generate-docs
         run: |
           output=$(npm run generate-docs)
-          echo "::set-output name=output::$output"
+          echo "Generated documentation:"
+          echo "$output"
 
-      - name: Comment on Pull Request
+      - name: Print Documentation Output
         run: |
-          output=$GITHUB_EVENT_PATH
-          COMMENT="Generated documentation:\n\`\`\`${output}\`\`\`"
-
-          npx octokit rest -o $GITHUB_REPOSITORY -r $GITHUB_REPOSITORY issues/create-comment@v1 \
-            --issue_number ${{ github.event.pull_request.number }} \
-            --body "$COMMENT" \
-            --token ${{ secrets.GITHUB_TOKEN }}
+          echo "Documentation output from previous step:"
+          echo "${{ steps.generate-docs.outputs.output }}"
