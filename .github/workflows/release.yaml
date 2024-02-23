@@ -21,5 +21,4 @@ jobs:
         run: npm ci
 
       - name: Release
-        run: npx --node=20-lts semantic-release
-
+        run: npx --node=20.8.1 semantic-release
