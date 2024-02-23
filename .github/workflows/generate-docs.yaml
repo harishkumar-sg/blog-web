@@ -1,0 +1,43 @@
+name: Release Notes
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  generate-release-notes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Fetch Commit Data
+        id: fetch-commit
+        run: |
+          commit_sha=$(git rev-parse HEAD)
+          commit_data=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                         "https://api.github.com/repos/${{ github.repository }}/commits/$commit_sha")
+          echo "::set-output name=commit_data::$commit_data"
+
+      - name: Extract Release Notes
+        id: extract-notes
+        run: |
+          notes=$(echo "${{ steps.fetch-commit.outputs.commit_data }}" | jq -r '.commit.message')
+          echo "::set-output name=release_notes::$notes"
+
+      - name: Comment on Pull Request
+        if: ${{ github.event_name == 'push' && github.event_name != 'pull_request' }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const releaseNotes = process.env['RELEASE_NOTES'];
+            const context = github.context;
+
+            github.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `Release Notes:\n${releaseNotes}`
+            });

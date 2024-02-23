@@ -1,0 +1,39 @@
+name: Generate Release Note
+
+on:
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+  generate-release-note:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 14
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Fetch commit messages and generate release note
+      run: |
+        PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN{FS="/"} {print $3}')
+        COMMIT_MESSAGES=$(git log --pretty=format:"%s" $PR_NUMBER)
+        RELEASE_NOTE="Release Note for PR #$PR_NUMBER:\n\n$COMMIT_MESSAGES"
+
+        echo "$RELEASE_NOTE" > release-note.txt
+
+    - name: Print release note in PR comments
+      run: |
+        PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN{FS="/"} {print $3}')
+        RELEASE_NOTE=$(cat release-note.txt)
+
+        curl -XPOST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -d '{"body": "$RELEASE_NOTE"}' \
+          "https://api.github.com/repos/${{ github.repository }}/issues/$PR_NUMBER/comments"
