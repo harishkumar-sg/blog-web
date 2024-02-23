@@ -8,6 +8,9 @@ on:
 jobs:
   generate-docs:
     runs-on: ubuntu-latest
+    outputs:
+      id: generate-docs-output
+      value: ${{ steps.generate-docs.outputs.output }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -24,10 +27,13 @@ jobs:
         id: generate-docs
         run: |
           output=$(npm run generate-docs)
-          echo "Generated documentation:"
-          echo "$output"
+          echo "::set-output name=output::$output"
 
+  print-docs-output:
+    needs: generate-docs
+    runs-on: ubuntu-latest
+    steps:
       - name: Print Documentation Output
         run: |
-          echo "Documentation output from previous step:"
-          echo "${{ steps.generate-docs.outputs.output }}"
+          echo "Documentation output:"
+          echo "${{ needs.generate-docs.outputs.output }}"
