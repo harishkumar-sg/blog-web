@@ -1,6 +1,6 @@
 {
   "source": {
-    "include": ["./models","./public","/views","./app.js"],
+    "include": ["./models", "./public", "views", "./app.js"],
     "exclude": ["./node_modules", "./docs"]
   },
   "opts": {
